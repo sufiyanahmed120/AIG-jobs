@@ -38,13 +38,16 @@ export default function ProfileCompletion({ profile, onSave, onCancel }: Profile
   const [skillInput, setSkillInput] = useState('');
 
   const updateField = (section: keyof JobSeekerProfile, field: string, value: any) => {
-    setFormData((prev) => ({
-      ...prev,
-      [section]: {
-        ...prev[section],
-        [field]: value,
-      },
-    }));
+    setFormData(prev => {
+      const sectionData = (prev[section] as any) || {};
+      return {
+        ...prev,
+        [section]: {
+          ...sectionData,
+          [field]: value,
+        },
+      };
+    });
     // Clear errors for this field
     if (errors[field]) {
       setErrors((prev) => {
@@ -497,7 +500,7 @@ export default function ProfileCompletion({ profile, onSave, onCancel }: Profile
                   </select>
                 </div>
 
-                {formData.visaAndAvailability?.visaStatus !== 'no_visa' && (
+                {(formData.visaAndAvailability?.visaStatus as VisaStatus | undefined) !== 'no_visa' && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Visa Validity Date <span className="text-red-600">*</span>
@@ -505,11 +508,14 @@ export default function ProfileCompletion({ profile, onSave, onCancel }: Profile
                     <input
                       type="date"
                       value={formData.visaAndAvailability?.visaValidityDate || ''}
-                      onChange={(e) =>
+                      onChange={e =>
                         updateField('visaAndAvailability', 'visaValidityDate', e.target.value)
                       }
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-                      required={formData.visaAndAvailability?.visaStatus !== 'no_visa'}
+                      required={
+                        (formData.visaAndAvailability?.visaStatus as VisaStatus | undefined) !==
+                        'no_visa'
+                      }
                     />
                   </div>
                 )}

@@ -99,9 +99,21 @@ export default function ProfilePage() {
         [field]: value,
       },
     };
-    setProfile(updatedProfile);
+
+    // Ensure required privacy fields are always present to satisfy JobSeekerProfile type
+    const normalizedProfile: Partial<JobSeekerProfile> = {
+      ...updatedProfile,
+      privacy: {
+        profileVisibility: updatedProfile.privacy?.profileVisibility ?? 'employers_only',
+        showPhone: updatedProfile.privacy?.showPhone ?? false,
+        showEmail: updatedProfile.privacy?.showEmail ?? false,
+        showCurrentCompany: updatedProfile.privacy?.showCurrentCompany ?? true,
+      },
+    };
+
+    setProfile(normalizedProfile);
     if (user?.id) {
-      localStorage.setItem(`profile_${user.id}`, JSON.stringify(updatedProfile));
+      localStorage.setItem(`profile_${user.id}`, JSON.stringify(normalizedProfile));
     }
   };
 
