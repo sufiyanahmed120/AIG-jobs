@@ -23,6 +23,8 @@ import {
   Gauge,
   Sparkles,
   ListChecks,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { formatDate } from '@/lib/dateUtils';
 
@@ -50,6 +52,7 @@ export default function EmployerDashboard() {
     useState<CandidateStatusFilter>('all');
   const [searchKeyword, setSearchKeyword] = useState('');
   const [searchLocation, setSearchLocation] = useState('');
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const companyJobs = useMemo(
     () => jobs.filter(j => j.companyId === employer?.companyId),
@@ -881,39 +884,59 @@ export default function EmployerDashboard() {
 
   return (
     <div className="bg-gray-50 min-h-screen flex">
-      <aside className="w-56 bg-gray-900 text-white flex flex-col py-4">
-        <div className="px-4 mb-4">
-          <p className="text-xs uppercase tracking-wide text-gray-400 mb-2">Employer</p>
-          <p className="text-sm font-semibold truncate">{employer?.companyName || 'My Company'}</p>
+      <aside
+        className={`bg-gray-900 text-white flex flex-col py-4 transition-all duration-200 ${
+          isCollapsed ? 'w-16' : 'w-56'
+        }`}
+      >
+        <div className={`flex items-center mb-4 px-2 ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
+          {!isCollapsed && (
+            <div className="px-2">
+              <p className="text-xs uppercase tracking-wide text-gray-400 mb-1">Employer</p>
+              <p className="text-sm font-semibold truncate">
+                {employer?.companyName || 'My Company'}
+              </p>
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={() => setIsCollapsed(prev => !prev)}
+            className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-800 hover:bg-gray-700 text-gray-200"
+            aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+          </button>
         </div>
         <nav className="flex-1 space-y-1 px-2">
           <button
             type="button"
             onClick={() => router.push('/employer/post-job')}
-            className="w-full flex items-center px-3 py-2 rounded-md text-sm font-medium bg-red-600 text-white hover:bg-red-700"
+            className={`w-full flex items-center px-3 py-2 rounded-md text-sm font-medium bg-red-600 text-white hover:bg-red-700 ${
+              isCollapsed ? 'justify-center' : ''
+            }`}
           >
-            <PlusCircle className="w-4 h-4 mr-2" />
-            Create new
+            <PlusCircle className={`w-4 h-4 ${isCollapsed ? '' : 'mr-2'}`} />
+            {!isCollapsed && <span>Create new</span>}
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('jobs')}
             className={`w-full flex items-center px-3 py-2 rounded-md text-sm mt-1 ${
               activeTab === 'jobs' ? 'bg-gray-800 text-white' : 'text-gray-200 hover:bg-gray-800'
-            }`}
+            } ${isCollapsed ? 'justify-center' : ''}`}
           >
-            <Briefcase className="w-4 h-4 mr-2" />
-            Jobs
+            <Briefcase className={`w-4 h-4 ${isCollapsed ? '' : 'mr-2'}`} />
+            {!isCollapsed && <span>Jobs</span>}
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('smart')}
             className={`w-full flex items-center px-3 py-2 rounded-md text-sm ${
               activeTab === 'smart' ? 'bg-gray-800 text-white' : 'text-gray-200 hover:bg-gray-800'
-            }`}
+            } ${isCollapsed ? 'justify-center' : ''}`}
           >
-            <Users className="w-4 h-4 mr-2" />
-            Smart Sourcing
+            <Users className={`w-4 h-4 ${isCollapsed ? '' : 'mr-2'}`} />
+            {!isCollapsed && <span>Smart Sourcing</span>}
           </button>
           <button
             type="button"
@@ -922,10 +945,10 @@ export default function EmployerDashboard() {
               activeTab === 'candidates'
                 ? 'bg-gray-800 text-white'
                 : 'text-gray-200 hover:bg-gray-800'
-            }`}
+            } ${isCollapsed ? 'justify-center' : ''}`}
           >
-            <Users className="w-4 h-4 mr-2" />
-            Candidates
+            <Users className={`w-4 h-4 ${isCollapsed ? '' : 'mr-2'}`} />
+            {!isCollapsed && <span>Candidates</span>}
           </button>
           <button
             type="button"
@@ -934,30 +957,30 @@ export default function EmployerDashboard() {
               activeTab === 'interviews'
                 ? 'bg-gray-800 text-white'
                 : 'text-gray-200 hover:bg-gray-800'
-            }`}
+            } ${isCollapsed ? 'justify-center' : ''}`}
           >
-            <Calendar className="w-4 h-4 mr-2" />
-            Interviews
+            <Calendar className={`w-4 h-4 ${isCollapsed ? '' : 'mr-2'}`} />
+            {!isCollapsed && <span>Interviews</span>}
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('analytics')}
             className={`w-full flex items-center px-3 py-2 rounded-md text-sm ${
               activeTab === 'analytics' ? 'bg-gray-800 text-white' : 'text-gray-200 hover:bg-gray-800'
-            }`}
+            } ${isCollapsed ? 'justify-center' : ''}`}
           >
-            <BarChart2 className="w-4 h-4 mr-2" />
-            Analytics
+            <BarChart2 className={`w-4 h-4 ${isCollapsed ? '' : 'mr-2'}`} />
+            {!isCollapsed && <span>Analytics</span>}
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('tools')}
             className={`w-full flex items-center px-3 py-2 rounded-md text-sm ${
               activeTab === 'tools' ? 'bg-gray-800 text-white' : 'text-gray-200 hover:bg-gray-800'
-            }`}
+            } ${isCollapsed ? 'justify-center' : ''}`}
           >
-            <Wrench className="w-4 h-4 mr-2" />
-            Tools
+            <Wrench className={`w-4 h-4 ${isCollapsed ? '' : 'mr-2'}`} />
+            {!isCollapsed && <span>Tools</span>}
           </button>
         </nav>
       </aside>
