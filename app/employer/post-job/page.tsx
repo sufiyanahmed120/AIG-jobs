@@ -7,6 +7,14 @@ import { useData } from '@/context/DataContext';
 import { categories, locations } from '@/lib/mockData';
 import { Job, JobType, ExperienceLevel } from '@/types';
 import Button from '@/components/Button';
+import {
+  PlusCircle,
+  Briefcase,
+  Users,
+  Calendar,
+  BarChart2,
+  Wrench,
+} from 'lucide-react';
 
 export default function PostJobPage() {
   const router = useRouter();
@@ -111,10 +119,78 @@ export default function PostJobPage() {
     return null;
   }
 
+  const employer = user as any;
+
   return (
-    <div className="bg-gray-50 min-h-screen py-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Post a Job</h1>
+    <div className="bg-gray-50 min-h-screen flex">
+      <aside className="w-56 bg-gray-900 text-white flex flex-col py-4">
+        <div className="px-4 mb-4">
+          <p className="text-xs uppercase tracking-wide text-gray-400 mb-2">Employer</p>
+          <p className="text-sm font-semibold truncate">{employer?.companyName || 'My Company'}</p>
+        </div>
+        <nav className="flex-1 space-y-1 px-2">
+          <button
+            type="button"
+            onClick={() => router.push('/employer/post-job')}
+            className="w-full flex items-center px-3 py-2 rounded-md text-sm font-medium bg-red-600 text-white hover:bg-red-700"
+          >
+            <PlusCircle className="w-4 h-4 mr-2" />
+            Create new
+          </button>
+          <button
+            type="button"
+            onClick={() => router.push('/')}
+            className="w-full flex items-center px-3 py-2 rounded-md text-sm mt-1 text-gray-200 hover:bg-gray-800"
+          >
+            <Briefcase className="w-4 h-4 mr-2" />
+            Jobs
+          </button>
+          <button
+            type="button"
+            onClick={() => router.push('/')}
+            className="w-full flex items-center px-3 py-2 rounded-md text-sm text-gray-200 hover:bg-gray-800"
+          >
+            <Users className="w-4 h-4 mr-2" />
+            Smart Sourcing
+          </button>
+          <button
+            type="button"
+            onClick={() => router.push('/employer/candidates')}
+            className="w-full flex items-center px-3 py-2 rounded-md text-sm text-gray-200 hover:bg-gray-800"
+          >
+            <Users className="w-4 h-4 mr-2" />
+            Candidates
+          </button>
+          <button
+            type="button"
+            onClick={() => router.push('/employer/interviews')}
+            className="w-full flex items-center px-3 py-2 rounded-md text-sm text-gray-200 hover:bg-gray-800"
+          >
+            <Calendar className="w-4 h-4 mr-2" />
+            Interviews
+          </button>
+          <button
+            type="button"
+            onClick={() => alert('Analytics dashboard is coming soon in this demo.')}
+            className="w-full flex items-center px-3 py-2 rounded-md text-sm text-gray-200 hover:bg-gray-800"
+          >
+            <BarChart2 className="w-4 h-4 mr-2" />
+            Analytics
+          </button>
+          <button
+            type="button"
+            onClick={() => router.push('/employer/tools')}
+            className="w-full flex items-center px-3 py-2 rounded-md text-sm text-gray-200 hover:bg-gray-800"
+          >
+            <Wrench className="w-4 h-4 mr-2" />
+            Tools
+          </button>
+        </nav>
+      </aside>
+
+      <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-3xl font-bold text-gray-900 mb-8">Post a Job</h1>
 
         <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-8 space-y-6">
           {/* Job Title */}
@@ -360,7 +436,8 @@ export default function PostJobPage() {
             </Button>
           </div>
         </form>
-      </div>
+        </div>
+      </main>
     </div>
   );
 }

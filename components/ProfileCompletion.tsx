@@ -22,6 +22,7 @@ interface ProfileCompletionProps {
   profile: Partial<JobSeekerProfile>;
   onSave: (profile: Partial<JobSeekerProfile>) => void;
   onCancel: () => void;
+  onSkip?: () => void;
 }
 
 const STEPS = [
@@ -31,7 +32,7 @@ const STEPS = [
   { id: 4, name: 'CV Upload', icon: FileText },
 ];
 
-export default function ProfileCompletion({ profile, onSave, onCancel }: ProfileCompletionProps) {
+export default function ProfileCompletion({ profile, onSave, onCancel, onSkip }: ProfileCompletionProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<Partial<JobSeekerProfile>>(profile || getDefaultProfile());
   const [errors, setErrors] = useState<Record<string, string[]>>({});
@@ -708,6 +709,11 @@ export default function ProfileCompletion({ profile, onSave, onCancel }: Profile
           )}
         </div>
         <div className="flex gap-3">
+          {onSkip && (
+            <Button onClick={onSkip} variant="outline">
+              Skip
+            </Button>
+          )}
           <Button onClick={onCancel} variant="outline">
             Cancel
           </Button>

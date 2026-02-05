@@ -26,7 +26,7 @@ import {
 } from 'lucide-react';
 import { formatDate } from '@/lib/dateUtils';
 
-type Tab = 'smart' | 'jobs' | 'candidates' | 'interviews' | 'tools';
+type Tab = 'smart' | 'jobs' | 'candidates' | 'interviews' | 'tools' | 'analytics';
 type JobStatusFilter = 'all' | 'approved' | 'pending' | 'rejected';
 type CandidateStatusFilter = 'all' | 'pending' | 'reviewed' | 'shortlisted' | 'rejected';
 
@@ -48,6 +48,8 @@ export default function EmployerDashboard() {
   const [jobStatusFilter, setJobStatusFilter] = useState<JobStatusFilter>('all');
   const [candidateStatusFilter, setCandidateStatusFilter] =
     useState<CandidateStatusFilter>('all');
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const [searchLocation, setSearchLocation] = useState('');
 
   const companyJobs = useMemo(
     () => jobs.filter(j => j.companyId === employer?.companyId),
@@ -113,7 +115,7 @@ export default function EmployerDashboard() {
   const renderMain = () => {
     if (activeTab === 'jobs') {
       return (
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
           <div className="mb-4 flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-gray-900 mb-1">Jobs</h1>
@@ -248,7 +250,7 @@ export default function EmployerDashboard() {
 
     if (activeTab === 'candidates') {
       return (
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
           <div className="mb-4">
             <h1 className="text-2xl font-bold text-gray-900 mb-1">Candidates</h1>
             <p className="text-gray-600 text-sm">All open and paused jobs</p>
@@ -379,7 +381,7 @@ export default function EmployerDashboard() {
 
     if (activeTab === 'interviews') {
       return (
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
           <div className="mb-4">
             <h1 className="text-2xl font-bold text-gray-900 mb-1">Interviews</h1>
             <p className="text-gray-600 text-sm">
@@ -498,7 +500,7 @@ export default function EmployerDashboard() {
 
     if (activeTab === 'tools') {
       return (
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
           <div className="mb-6">
             <h1 className="text-3xl font-bold text-gray-900 mb-1">Employer Tools</h1>
             <p className="text-gray-600 text-sm">
@@ -630,9 +632,174 @@ export default function EmployerDashboard() {
       );
     }
 
+    if (activeTab === 'analytics') {
+      const approvedJobs = companyJobs.filter(j => j.status === 'approved').length;
+      const totalViews = companyJobs.reduce((sum, job) => sum + (job.views || 0), 0);
+      const avgViewsPerJob = companyJobs.length > 0 ? Math.round(totalViews / companyJobs.length) : 0;
+      const shortlistedCandidates = companyApplications.filter(a => a.status === 'shortlisted').length;
+      const applicationRate = companyJobs.length > 0 ? Math.round((companyApplications.length / companyJobs.length) * 10) / 10 : 0;
+
+      return (
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Analytics Dashboard</h1>
+            <p className="text-gray-600 text-sm">Track your hiring performance and insights</p>
+          </div>
+
+          {/* Key Metrics */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 hover:shadow-lg transition cursor-pointer" onClick={() => setActiveTab('jobs')}>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs uppercase tracking-wide text-gray-500">Total Jobs</p>
+                <Briefcase className="w-5 h-5 text-gray-400" />
+              </div>
+              <p className="text-3xl font-bold text-gray-900">{companyJobs.length}</p>
+              <p className="text-xs text-gray-500 mt-1">{approvedJobs} approved</p>
+            </div>
+            <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 hover:shadow-lg transition">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs uppercase tracking-wide text-gray-500">Total Views</p>
+                <BarChart2 className="w-5 h-5 text-gray-400" />
+              </div>
+              <p className="text-3xl font-bold text-gray-900">{totalViews}</p>
+              <p className="text-xs text-gray-500 mt-1">Avg {avgViewsPerJob} per job</p>
+            </div>
+            <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 hover:shadow-lg transition cursor-pointer" onClick={() => setActiveTab('candidates')}>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs uppercase tracking-wide text-gray-500">Applications</p>
+                <Users className="w-5 h-5 text-gray-400" />
+              </div>
+              <p className="text-3xl font-bold text-gray-900">{companyApplications.length}</p>
+              <p className="text-xs text-gray-500 mt-1">{applicationRate} per job</p>
+            </div>
+            <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 hover:shadow-lg transition">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs uppercase tracking-wide text-gray-500">Shortlisted</p>
+                <Check className="w-5 h-5 text-gray-400" />
+              </div>
+              <p className="text-3xl font-bold text-gray-900">{shortlistedCandidates}</p>
+              <p className="text-xs text-gray-500 mt-1">
+                {companyApplications.length > 0 
+                  ? Math.round((shortlistedCandidates / companyApplications.length) * 100) 
+                  : 0}% rate
+              </p>
+            </div>
+          </div>
+
+          {/* Job Status Breakdown */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Job Status</h2>
+              <div className="space-y-3">
+                {(['approved', 'pending', 'rejected'] as const).map(status => {
+                  const count = companyJobs.filter(j => j.status === status).length;
+                  const percentage = companyJobs.length > 0 ? Math.round((count / companyJobs.length) * 100) : 0;
+                  return (
+                    <div key={status}>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span className="text-gray-700 capitalize">{status}</span>
+                        <span className="font-semibold text-gray-900">{count} ({percentage}%)</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div
+                          className={`h-2 rounded-full transition-all ${
+                            status === 'approved' ? 'bg-green-500' :
+                            status === 'pending' ? 'bg-yellow-500' :
+                            'bg-red-500'
+                          }`}
+                          style={{ width: `${percentage}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Application Status</h2>
+              <div className="space-y-3">
+                {(['pending', 'reviewed', 'shortlisted', 'rejected'] as const).map(status => {
+                  const count = companyApplications.filter(a => a.status === status).length;
+                  const percentage = companyApplications.length > 0 ? Math.round((count / companyApplications.length) * 100) : 0;
+                  return (
+                    <div key={status}>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span className="text-gray-700 capitalize">{status}</span>
+                        <span className="font-semibold text-gray-900">{count} ({percentage}%)</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div
+                          className={`h-2 rounded-full transition-all ${
+                            status === 'shortlisted' ? 'bg-green-500' :
+                            status === 'reviewed' ? 'bg-blue-500' :
+                            status === 'pending' ? 'bg-yellow-500' :
+                            'bg-red-500'
+                          }`}
+                          style={{ width: `${percentage}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Top Performing Jobs */}
+          <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Top Performing Jobs</h2>
+            {companyJobs.length > 0 ? (
+              <div className="space-y-3">
+                {companyJobs
+                  .sort((a, b) => (b.views || 0) - (a.views || 0))
+                  .slice(0, 5)
+                  .map(job => {
+                    const jobApplications = getApplicationsByJob(job.id);
+                    return (
+                      <div
+                        key={job.id}
+                        className="flex items-center justify-between p-3 border border-gray-200 rounded-md hover:bg-gray-50 transition cursor-pointer"
+                        onClick={() => router.push(`/employer/jobs/${job.id}`)}
+                      >
+                        <div className="flex-1">
+                          <p className="font-semibold text-gray-900">{job.title}</p>
+                          <p className="text-sm text-gray-500">{job.location.city}, {job.location.country}</p>
+                        </div>
+                        <div className="flex items-center gap-6 text-sm">
+                          <div className="text-center">
+                            <p className="text-gray-500">Views</p>
+                            <p className="font-semibold text-gray-900">{job.views || 0}</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-gray-500">Applications</p>
+                            <p className="font-semibold text-gray-900">{jobApplications.length}</p>
+                          </div>
+                          <div className="text-center">
+                            <span className={`px-2 py-1 rounded text-xs font-medium ${
+                              job.status === 'approved' ? 'bg-green-100 text-green-800' :
+                              job.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-red-100 text-red-800'
+                            }`}>
+                              {job.status}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            ) : (
+              <p className="text-gray-500 text-center py-8">No jobs posted yet</p>
+            )}
+          </div>
+        </div>
+      );
+    }
+
     // Smart sourcing default view
     return (
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Discover and engage with top talent
@@ -645,28 +812,37 @@ export default function EmployerDashboard() {
 
         <div className="bg-white rounded-lg shadow-md border border-gray-200 p-4 mb-8">
           <form
-            onSubmit={e => e.preventDefault()}
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (searchKeyword || searchLocation) {
+                setActiveTab('candidates');
+              }
+            }}
             className="flex flex-col md:flex-row gap-3 items-stretch"
           >
-            <div className="flex-1 flex items-center border border-gray-300 rounded-md px-3 py-2 bg-gray-50">
+            <div className="flex-1 flex items-center border border-gray-300 rounded-md px-3 py-2 bg-gray-50 focus-within:border-red-500 focus-within:ring-2 focus-within:ring-red-200 transition">
               <Search className="w-4 h-4 text-gray-400 mr-2" />
               <input
                 type="text"
+                value={searchKeyword}
+                onChange={(e) => setSearchKeyword(e.target.value)}
                 placeholder="Job title, skills, or keywords"
                 className="flex-1 bg-transparent outline-none text-sm text-gray-900 placeholder-gray-400"
               />
             </div>
-            <div className="flex-1 flex items-center border border-gray-300 rounded-md px-3 py-2 bg-gray-50">
+            <div className="flex-1 flex items-center border border-gray-300 rounded-md px-3 py-2 bg-gray-50 focus-within:border-red-500 focus-within:ring-2 focus-within:ring-red-200 transition">
               <Search className="w-4 h-4 text-gray-400 mr-2" />
               <input
                 type="text"
+                value={searchLocation}
+                onChange={(e) => setSearchLocation(e.target.value)}
                 placeholder="City or country"
                 className="flex-1 bg-transparent outline-none text-sm text-gray-900 placeholder-gray-400"
               />
             </div>
             <button
               type="submit"
-              className="px-6 py-2 rounded-md bg-red-600 text-white text-sm font-semibold hover:bg-red-700"
+              className="px-6 py-2 rounded-md bg-red-600 text-white text-sm font-semibold hover:bg-red-700 transition shadow-sm hover:shadow-md"
             >
               Find candidates
             </button>
@@ -674,16 +850,24 @@ export default function EmployerDashboard() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <p className="text-xs uppercase tracking-wide text-gray-500 mb-1">
+          <button
+            onClick={() => setActiveTab('jobs')}
+            className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md hover:border-red-300 transition-all cursor-pointer text-left group"
+          >
+            <p className="text-xs uppercase tracking-wide text-gray-500 mb-1 group-hover:text-red-600 transition">
               Open & pending jobs
             </p>
-            <p className="text-2xl font-bold text-gray-900">{companyJobs.length}</p>
-          </div>
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <p className="text-xs uppercase tracking-wide text-gray-500 mb-1">Total candidates</p>
-            <p className="text-2xl font-bold text-gray-900">{companyApplications.length}</p>
-          </div>
+            <p className="text-2xl font-bold text-gray-900 group-hover:text-red-600 transition">{companyJobs.length}</p>
+            <p className="text-xs text-gray-400 mt-1">Click to view all jobs →</p>
+          </button>
+          <button
+            onClick={() => setActiveTab('candidates')}
+            className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md hover:border-red-300 transition-all cursor-pointer text-left group"
+          >
+            <p className="text-xs uppercase tracking-wide text-gray-500 mb-1 group-hover:text-red-600 transition">Total candidates</p>
+            <p className="text-2xl font-bold text-gray-900 group-hover:text-red-600 transition">{companyApplications.length}</p>
+            <p className="text-xs text-gray-400 mt-1">Click to view candidates →</p>
+          </button>
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
             <p className="text-xs uppercase tracking-wide text-gray-500 mb-1">Company</p>
             <p className="text-sm font-semibold text-gray-900">
@@ -757,8 +941,10 @@ export default function EmployerDashboard() {
           </button>
           <button
             type="button"
-            onClick={() => alert('Analytics dashboard is coming soon in this demo.')}
-            className="w-full flex items-center px-3 py-2 rounded-md text-sm text-gray-200 hover:bg-gray-800"
+            onClick={() => setActiveTab('analytics')}
+            className={`w-full flex items-center px-3 py-2 rounded-md text-sm ${
+              activeTab === 'analytics' ? 'bg-gray-800 text-white' : 'text-gray-200 hover:bg-gray-800'
+            }`}
           >
             <BarChart2 className="w-4 h-4 mr-2" />
             Analytics

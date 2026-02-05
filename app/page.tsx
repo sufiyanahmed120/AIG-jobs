@@ -6,11 +6,14 @@ import { useRouter } from 'next/navigation';
 import { Search, MapPin, Briefcase, Filter, X } from 'lucide-react';
 import JobCard from '@/components/JobCard';
 import FilterSelect from '@/components/FilterSelect';
+import ProfileCompletion from '@/components/ProfileCompletion';
 import { useData } from '@/context/DataContext';
 import { useAuth } from '@/context/AuthContext';
 import EmployerDashboard from '@/components/EmployerDashboard';
 import { locations, categories } from '@/lib/mockData';
 import { getJobRoleSuggestions, getLocationSuggestions } from '@/lib/searchUtils';
+import { getDefaultProfile, calculateProfileCompleteness } from '@/lib/profileUtils';
+import { JobSeekerProfile } from '@/types';
 
 // Country flag mapping - maps country names to flag image paths
 // Place flag images in: public/images/flags/
@@ -35,6 +38,10 @@ export default function Home() {
   const [selectedJobType, setSelectedJobType] = useState('');
   const [selectedExperience, setSelectedExperience] = useState('');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  
+  // Profile completion modal state
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [profile, setProfile] = useState<Partial<JobSeekerProfile>>(getDefaultProfile());
   
   // Autocomplete states
   const [roleSuggestions, setRoleSuggestions] = useState<string[]>([]);
@@ -85,6 +92,76 @@ export default function Home() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Check if user is new and show profile completion modal
+  useEffect(() => {
+    if (isAuthenticated && user?.role === 'job_seeker' && user?.id) {
+      const savedProfile = localStorage.getItem(`profile_${user.id}`);
+      const skippedProfile = localStorage.getItem(`profile_skipped_${user.id}`);
+      
+      // Don't show modal if profile exists or user skipped it
+      if (savedProfile || skippedProfile === 'true') {
+        setShowProfileModal(false);
+        return;
+      }
+      
+      // New user who hasn't skipped - show profile completion modal
+      // Pre-fill with user's email and name
+      const defaultProfile = getDefaultProfile();
+      const basePersonalDetails: JobSeekerProfile['personalDetails'] = {
+        ...(defaultProfile.personalDetails as JobSeekerProfile['personalDetails']),
+        name: user.name || '',
+        email: user.email || '',
+      };
+
+      setProfile({
+        ...defaultProfile,
+        personalDetails: basePersonalDetails,
+      });
+      setShowProfileModal(true);
+    } else {
+      // Not authenticated or not job seeker, close modal
+      setShowProfileModal(false);
+    }
+  }, [isAuthenticated, user?.id, user?.role]);
+
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (showProfileModal) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [showProfileModal]);
+
+  const handleSaveProfile = (updatedProfile: Partial<JobSeekerProfile>) => {
+    const finalProfile = {
+      ...updatedProfile,
+      profileCompleteness: calculateProfileCompleteness(updatedProfile),
+      lastUpdated: new Date().toISOString(),
+    };
+    setProfile(finalProfile);
+    if (user?.id) {
+      localStorage.setItem(`profile_${user.id}`, JSON.stringify(finalProfile));
+    }
+    // Close modal immediately after saving - it won't show again because profile now exists
+    setShowProfileModal(false);
+  };
+
+  const handleCancelProfile = () => {
+    setShowProfileModal(false);
+  };
+
+  const handleSkipProfile = () => {
+    // Mark that user skipped the profile completion
+    if (user?.id) {
+      localStorage.setItem(`profile_skipped_${user.id}`, 'true');
+    }
+    setShowProfileModal(false);
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -320,7 +397,7 @@ export default function Home() {
       {/* Browse Jobs by Location */}
       <section className="py-12 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8">Find jobs by location</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-8">Find jobs by Country</h2>
           <div className="relative overflow-hidden">
             {/* Auto-scrolling row of country cards */}
             <div className="marquee-row gap-4">
@@ -332,7 +409,7 @@ export default function Home() {
                   return (
                     <Link
                       key={`${country}-${Math.random()}`}
-                      href={`/jobs?country=${country}`}
+                      href={isAuthenticated ? `/jobs?country=${country}` : "/login"}
                       className="min-w-[140px] bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition text-center border border-gray-200 hover:border-red-300 mr-2"
                     >
                       <div className="mb-2 flex justify-center items-center h-8">
@@ -372,7 +449,7 @@ export default function Home() {
               return (
                 <Link
                   key={category}
-                  href={`/jobs?category=${encodeURIComponent(category)}`}
+                  href={isAuthenticated ? `/jobs?category=${encodeURIComponent(category)}` : "/login"}
                   className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition border border-gray-200 hover:border-red-300"
                 >
                   <div className="text-3xl mb-3">
@@ -458,6 +535,20 @@ export default function Home() {
             </div>
           </div>
         </section>
+      )}
+
+      {/* Profile Completion Modal for New Users */}
+      {showProfileModal && isAuthenticated && user?.role === 'job_seeker' && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="relative bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <ProfileCompletion
+              profile={profile}
+              onSave={handleSaveProfile}
+              onCancel={handleCancelProfile}
+              onSkip={handleSkipProfile}
+            />
+          </div>
+        </div>
       )}
     </div>
   );

@@ -10,7 +10,9 @@ interface JobCardProps {
 
 export default function JobCard({ job, showCompanyLogo = true }: JobCardProps) {
   const formatSalary = (salary: Job['salary']) => {
-    return `${salary.currency} ${salary.min.toLocaleString()} - ${salary.max.toLocaleString()}`;
+    // Use 'en-US' locale to ensure consistent formatting on server and client
+    const formatNumber = (num: number) => num.toLocaleString('en-US');
+    return `${salary.currency} ${formatNumber(salary.min)} - ${formatNumber(salary.max)}`;
   };
 
   const getExperienceColor = (exp: string) => {

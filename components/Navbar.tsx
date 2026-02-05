@@ -94,7 +94,7 @@ export default function Navbar() {
                     onClick={() => setIsExploreOpen(prev => !prev)}
                     className="text-gray-700 hover:text-red-600 transition flex items-center"
                   >
-                    Explore
+                    AIG Academy
                   </button>
                   {isExploreOpen && (
                     <div className="absolute left-1/2 -translate-x-1/2 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg py-2 z-40">

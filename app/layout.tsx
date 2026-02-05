@@ -5,6 +5,7 @@ import { AuthProvider } from '@/context/AuthContext';
 import { DataProvider } from '@/context/DataContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import Chatbot from '@/components/Chatbot';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -31,13 +32,16 @@ export default function RootLayout({
               <Footer />
             </div>
 
+            {/* Chatbot Component */}
+            <Chatbot />
+
             {/* WhatsApp Floating Button */}
             <a
               href="https://wa.me"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Chat with us on WhatsApp"
-              className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 rounded-full bg-green-500 hover:bg-green-600 text-white shadow-lg p-3 md:p-4 flex items-center justify-center whatsapp-pulse"
+              className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-40 rounded-full bg-green-500 hover:bg-green-600 text-white shadow-lg p-3 md:p-4 flex items-center justify-center whatsapp-pulse"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
